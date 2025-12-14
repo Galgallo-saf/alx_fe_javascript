@@ -146,3 +146,25 @@ populateCategories();
 showRandomQuote();
 syncQuotes();
 setInterval(syncQuotes, 60000); // sync every 60s
+const categoryFilter = document.getElementById("categoryFilter");
+
+function populateCategories() {
+  const uniqueCategories = ["All", ...new Set(quotes.map(q => q.category))];
+  categoryFilter.innerHTML = "";
+  uniqueCategories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    if (cat === selectedCategory) option.selected = true;
+    categoryFilter.appendChild(option);
+  });
+}
+
+function filterQuotes() {
+  selectedCategory = categoryFilter.value;
+  localStorage.setItem("selectedCategory", selectedCategory);
+  showRandomQuote();
+}
+
+// Event listener
+categoryFilter.addEventListener("change", filterQuotes);
