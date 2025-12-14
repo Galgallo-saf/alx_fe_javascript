@@ -128,3 +128,58 @@ function importFromJsonFile(event) {
 
 // Event listener for export button
 document.getElementById("exportQuotes").addEventListener("click", exportToJsonFile);
+function populateCategories() {
+  const categorySelect = document.getElementById("categoryFilter");
+  // Clear existing except "All"
+  categorySelect.innerHTML = '<option value="all">All</option>';
+
+  const uniqueCategories = [...new Set(quotes.map(q => q.category))];
+  uniqueCategories.forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    categorySelect.appendChild(option);
+  });
+
+  // Restore last selected category from local storage
+  const savedCategory = localStorage.getItem("lastCategory") || "all";
+  categorySelect.value = savedCategory;
+}
+function filterQuotes() {
+  const category = document.getElementById("categoryFilter").value;
+  localStorage.setItem("lastCategory", category); // Save selection
+
+  let filteredQuotes = quotes;
+  if (category !== "all") {
+    filteredQuotes = quotes.filter(q => q.category === category);
+  }
+
+  showRandomQuote(filteredQuotes);
+}
+
+// Modify showRandomQuote to accept a filtered array
+function showRandomQuote(array = quotes) {
+  const randomIndex = Math.floor(Math.random() * array.length);
+  const quoteDisplay = document.getElementById("quoteDisplay");
+  quoteDisplay.innerHTML = `${array[randomIndex].text} — ${array[randomIndex].category}`;
+}
+
+// Add event listener
+document.getElementById("categoryFilter").addEventListener("change", filterQuotes);
+function addQuote() {
+  const textInput = document.getElementById("newQuoteText");
+  const categoryInput = document.getElementById("newQuoteCategory");
+
+  if (textInput.value && categoryInput.value) {
+    quotes.push({ text: textInput.value, category: categoryInput.value });
+    saveQuotes(); // your existing function to update localStorage
+    textInput.value = "";
+    categoryInput.value = "";
+    populateCategories(); // update dropdown with new category
+    filterQuotes(); // apply filter and show new quote
+  } else {
+    alert("Please fill in both the quote and the category.");
+  }
+}
+populateCategories();
+filterQuotes(); // show initial filtered/random quote
