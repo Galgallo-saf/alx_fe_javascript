@@ -95,3 +95,36 @@ createAddQuoteForm();
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 document.getElementById("exportBtn").addEventListener("click", exportQuotes);
 document.getElementById("importFile").addEventListener("change", importFromJsonFile);
+// Export quotes to JSON file
+function exportToJsonFile() {
+  const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quotes.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Import quotes from JSON file
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(event) {
+    try {
+      const importedQuotes = JSON.parse(event.target.result);
+      if (Array.isArray(importedQuotes)) {
+        quotes.push(...importedQuotes);
+        showRandomQuote(); // show a random quote after import
+        alert("Quotes imported successfully!");
+      } else {
+        alert("Invalid file format!");
+      }
+    } catch (err) {
+      alert("Error reading file: " + err.message);
+    }
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// Event listener for export button
+document.getElementById("exportQuotes").addEventListener("click", exportToJsonFile);
