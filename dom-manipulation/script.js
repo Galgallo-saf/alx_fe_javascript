@@ -107,3 +107,37 @@ document.getElementById("exportBtn").addEventListener("click", exportToJsonFile)
 // Initial setup
 populateCategories();
 displayRandomQuote();
+async function fetchServerQuotes() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts'); // mock API
+    const serverQuotes = await response.json();
+    syncQuotes(serverQuotes);
+  } catch (error) {
+    console.error("Error fetching server data:", error);
+  }
+}
+
+// fetch updates every 30 seconds
+setInterval(fetchServerQuotes, 30000);
+function syncQuotes(serverQuotes) {
+  let localQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+  
+  // simple merge: server takes precedence
+  serverQuotes.forEach(sq => {
+    const index = localQuotes.findIndex(lq => lq.text === sq.text && lq.category === sq.category);
+    if (index === -1) {
+      localQuotes.push(sq);
+    } else {
+      localQuotes[index] = sq; // update local with server data
+    }
+  });
+
+  localStorage.setItem('quotes', JSON.stringify(localQuotes));
+  showRandomQuote(); // update DOM
+}
+function notifyUser(message) {
+  const notification = document.getElementById("notification");
+  notification.textContent = message;
+  notification.style.display = "block";
+  setTimeout(() => notification.style.display = "none", 5000);
+}
